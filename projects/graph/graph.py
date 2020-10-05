@@ -281,8 +281,8 @@ if __name__ == '__main__':
     graph.dft(1)
 
     print()
-    print("dfs_recursive:")
-    graph.dft_recursive(1)
+    print("dft_recursive:")
+    print(graph.dft_recursive(1))
 
     '''
     Valid BFS path:
