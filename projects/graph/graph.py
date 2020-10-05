@@ -153,6 +153,13 @@ class Graph:
 				    # APPEND THE NEIGHOR TO THE BACK
                     path_copy.append(neighbor)
 
+                    # CHECK IF IT'S THE TARGET
+                    if neighbor == destination_vertex:
+                        # IF SO, RETURN PATH
+                        return path_copy
+                    # add to queue
+                    q.enqueue(path_copy)
+
 
     def dfs(self, starting_vertex, destination_vertex):
         """
@@ -191,6 +198,13 @@ class Graph:
 				    # APPEND THE NEIGHOR TO THE BACK
                     path_copy.append(neighbor)
 
+                    # CHECK IF IT'S THE TARGET
+                    if neighbor == destination_vertex:
+                        # IF SO, RETURN PATH
+                        return path_copy
+                    # add to stack
+                    s.push(path_copy)
+
     def dfs_recursive(self, starting_vertex, destination_vertex, visited = None, path = []):
         """
         Return a list containing a path from
@@ -201,11 +215,11 @@ class Graph:
         """
         if visited == None:
             visited = set([starting_vertex])
-        
+
         path += [starting_vertex]
         
         for each in self.get_neighbors(starting_vertex):
-            if each not in visited:
+            if each not in path:
                 visited.add(each)
                 self.dfs_recursive(each, destination_vertex, visited, path)
                 
