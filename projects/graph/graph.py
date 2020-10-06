@@ -106,15 +106,25 @@ class Graph:
 
         This should be done using recursion.
         """
-        if visited == None:
-            visited = set([starting_vertex])
+        if visited is None:
+            visited = set()
+
+        print(starting_vertex)
+        visited.add(starting_vertex)
+
+        for neighbor in self.get_neighbors(starting_vertex):
+            if neighbor not in visited:
+                self.dft_recursive(neighbor, visited)
+
+        # if visited == None:
+        #     visited = set([starting_vertex])
         
-        for each in self.get_neighbors(starting_vertex):
-            if each not in visited:
-                visited.add(each)
-                self.dft_recursive(each, visited)
+        # for each in self.get_neighbors(starting_vertex):
+        #     if each not in visited:
+        #         visited.add(each)
+        #         self.dft_recursive(each, visited)
                 
-        return visited
+        # return visited
 
     def bfs(self, starting_vertex, destination_vertex):
         """
@@ -143,23 +153,20 @@ class Graph:
                     return path
 
 				# Mark it as visited...
-                print(last_v)   # "Visit" the node
+                # print(type(last_v))   # "Visit" the node
                 visited.add(last_v)
                 
 				# Then add A PATH TO its neighbors to the back of the queue
                 for neighbor in self.get_neighbors(last_v):
-				    # COPY THE PATH
+				    # COPY THE PATH 
                     path_copy = path.copy()
 				    # APPEND THE NEIGHOR TO THE BACK
                     path_copy.append(neighbor)
 
-                    # CHECK IF IT'S THE TARGET
-                    if neighbor == destination_vertex:
-                        # IF SO, RETURN PATH
-                        return path_copy
-                    # add to queue
-                    q.enqueue(path_copy)
-
+                    # alternative way to copy: make a new path and append neighbor:
+                    # new_path = path + [neighbor]
+                    # q.enqueue(new_path)
+        return None
 
     def dfs(self, starting_vertex, destination_vertex):
         """
@@ -197,15 +204,9 @@ class Graph:
                     path_copy = path.copy()
 				    # APPEND THE NEIGHOR TO THE BACK
                     path_copy.append(neighbor)
+        return None
 
-                    # CHECK IF IT'S THE TARGET
-                    if neighbor == destination_vertex:
-                        # IF SO, RETURN PATH
-                        return path_copy
-                    # add to stack
-                    s.push(path_copy)
-
-    def dfs_recursive(self, starting_vertex, destination_vertex, visited = None, path = []):
+    def dfs_recursive(self, starting_vertex, destination_vertex, visited = None, path = None):
         """
         Return a list containing a path from
         starting_vertex to destination_vertex in
@@ -213,17 +214,26 @@ class Graph:
 
         This should be done using recursion.
         """
-        if visited == None:
-            visited = set([starting_vertex])
+        if visited is None:
+            visited = set()
 
-        path += [starting_vertex]
-        
-        for each in self.get_neighbors(starting_vertex):
-            if each not in path:
-                visited.add(each)
-                self.dfs_recursive(each, destination_vertex, visited, path)
-                
-        return visited
+        if path is None:
+            path = [starting_vertex]
+
+        print(starting_vertex)
+        visited.add(starting_vertex)
+
+        for neighbor in self.get_neighbors(starting_vertex):
+            if neighbor not in visited:
+                new_path = path + [neighbor]
+                if neighbor == destination_vertex:
+                    return new_path
+
+                dfs_path = self.dfs_recursive(neighbor, destination_vertex, visited, new_path)
+                if dfs_path is not None: # don't understand this part
+                    return dfs_path
+
+        return None
 
 
 # graph = Graph()  # Instantiate your graph
