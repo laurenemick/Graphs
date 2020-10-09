@@ -12,10 +12,19 @@ world = World()
 
 # You may uncomment the smaller graphs for development and testing purposes.
 # map_file = "/Users/adrienneemick/Desktop/Lambda/web32cs/Graphs/projects/adventure/maps/test_line.txt"
+# # # shortest is 2
+
 # map_file = "/Users/adrienneemick/Desktop/Lambda/web32cs/Graphs/projects/adventure/maps/test_cross.txt"
+# # # shortest is 14
+
 # map_file = "/Users/adrienneemick/Desktop/Lambda/web32cs/Graphs/projects/adventure/maps/test_loop.txt"
+# # # shortest is 14
+
 # map_file = "/Users/adrienneemick/Desktop/Lambda/web32cs/Graphs/projects/adventure/maps/test_loop_fork.txt"
+# # # shortest is 24
+
 map_file = '/Users/adrienneemick/Desktop/Lambda/web32cs/Graphs/projects/adventure/maps/main_maze.txt'
+# # # shortest is 918
 
 cwd = os.getcwd()  # Get the current working directory (cwd)
 files = os.listdir(cwd)  # Get all the files in that directory
@@ -34,17 +43,78 @@ player = Player(world.starting_room)
 # traversal_path = ['n', 'n']
 traversal_path = []
 graph = {}
-graph[player.current_room] = {'n': '?', 's': '?', 'w': '?', 'e': '?'}
+
+class Stack():
+    def __init__(self):
+        self.stack = []
+    def push(self, value):
+        self.stack.append(value)
+    def pop(self):
+        if self.size() > 0:
+            return self.stack.pop()
+        else:
+            return None
+    def size(self):
+        return len(self.stack)
 
 # while there are rooms to be visited 
 while len(graph) < len(room_graph):
-    # picks a random unexplored direction from the player's current room
-    for direction in graph[player.current_room.id]:
-    # travels and logs that direction
-    # then loops
-    # When you reach a dead-end (i.e. a room with no unexplored paths), walk back to the nearest room that does contain an unexplored path
+    # if player hasn't been in the room, add it to graph with exits
+    if player.current_room.id not in graph:
+        graph[player.current_room.id] = {}
 
-    # You can find the path to the shortest unexplored room by using a breadth-first search for a room with a `'?'` for an exit.
+        for direction in player.current_room.get_exits():
+            # create tuples with each direction and '?' value
+            graph[player.current_room.id][direction] = '?'
+        # print(f'Graph: {graph}')
+        # print()
+
+    # picks a random unexplored direction from the player's current room
+    def get_unexplored_direction():
+        for direction in graph[player.current_room.id]:
+            if graph[player.current_room.id][direction] == '?':
+                return direction
+
+    current_unexplored_direction = get_unexplored_direction()
+    # if you have a room to explore
+    if current_unexplored_direction:
+        # save room
+        previous_room = player.current_room.id
+        # go to the room 
+        player.travel(current_unexplored_direction)
+        # and add it to path
+        traversal_path.append(current_unexplored_direction)
+        # give direction a value of room id
+        graph[previous_room][current_unexplored_direction] = player.current_room.id
+        print(f'traversal path: {traversal_path}')
+        print(f'Current room: {player.current_room.id}')
+    
+        # get opposite path, and backtrack until you find a ? 
+        opposite_path = []
+        for direction in traversal_path:
+            if direction == 'n':
+                opposite_path.append('s')
+            elif direction == 'w':
+                opposite_path.append('e')
+            elif direction == 's':
+                opposite_path.append('n')
+            elif direction == 'e':
+                opposite_path.append('w')
+
+        print(f'opposite path: {opposite_path}')
+        print(f'Graph: {graph}')
+
+    # otherwise, while backtrack path is not empty..
+    else:
+        while current_unexplored_direction is None:
+            # get direction to get to previous room
+            backtrack = opposite_path.pop()
+            # add to path
+            traversal_path.append(backtrack)
+            # move to previous room
+            player.travel(backtrack)
+            # reset current unexplored direction to random available exit
+            current_unexplored_direction = get_unexplored_direction()
 
 
 # TRAVERSAL TEST
@@ -64,15 +134,15 @@ else:
 
 
 
-# #######
-# # UNCOMMENT TO WALK AROUND
-# #######
-# player.current_room.print_room_description(player)
-# while True:
-#     cmds = input("-> ").lower().split(" ")
-#     if cmds[0] in ["n", "s", "e", "w"]:
-#         player.travel(cmds[0], True)
-#     elif cmds[0] == "q":
-#         break
-#     else:
-#         print("I did not understand that command.")
+#######
+# UNCOMMENT TO WALK AROUND
+#######
+player.current_room.print_room_description(player)
+while True:
+    cmds = input("-> ").lower().split(" ")
+    if cmds[0] in ["n", "s", "e", "w"]:
+        player.travel(cmds[0], True)
+    elif cmds[0] == "q":
+        break
+    else:
+        print("I did not understand that command.")
