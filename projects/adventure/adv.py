@@ -20,10 +20,10 @@ world = World()
 # map_file = "/Users/adrienneemick/Desktop/Lambda/web32cs/Graphs/projects/adventure/maps/test_loop.txt"
 # # # shortest is 14
 
-map_file = "/Users/adrienneemick/Desktop/Lambda/web32cs/Graphs/projects/adventure/maps/test_loop_fork.txt"
+# map_file = "/Users/adrienneemick/Desktop/Lambda/web32cs/Graphs/projects/adventure/maps/test_loop_fork.txt"
 # # # shortest is 24
 
-# map_file = '/Users/adrienneemick/Desktop/Lambda/web32cs/Graphs/projects/adventure/maps/main_maze.txt'
+map_file = '/Users/adrienneemick/Desktop/Lambda/web32cs/Graphs/projects/adventure/maps/main_maze.txt'
 # # # shortest is 918
 
 cwd = os.getcwd()  # Get the current working directory (cwd)
@@ -39,10 +39,33 @@ world.print_rooms()
 
 player = Player(world.starting_room)
 
+# class Stack():
+#     def __init__(self):
+#         self.stack = []
+#     def push(self, value):
+#         self.stack.append(value)
+#     def pop(self):
+#         if self.size() > 0:
+#             return self.stack.pop()
+#         else:
+#             return None
+#     def size(self):
+#         return len(self.stack)
+        
 # Fill this out with directions to walk
 # traversal_path = ['n', 'n']
 traversal_path = []
 graph = {}
+opposite_path = []
+
+opposite_direction = {
+    'n': 's',
+    's': 'n',
+    'w': 'e',
+    'e': 'w'
+}
+previous_room = None
+previous_direction = None
 
 # while there are rooms to be visited 
 while len(graph) < len(room_graph):
@@ -66,47 +89,61 @@ while len(graph) < len(room_graph):
     if len(graph) == len(room_graph):
         break
 
+    # check if coming from previous room 
+    if previous_room is not None:
+        # updates current and previous room
+        graph[previous_room][previous_direction] = player.current_room.id
+        graph[player.current_room.id][opposite_direction[previous_direction]] = previous_room
+
     current_unexplored_direction = get_unexplored_direction()
     # if you have a room to explore
     if current_unexplored_direction:
-        # save room
+        # save room and directions
         previous_room = player.current_room.id
+        previous_direction = current_unexplored_direction
         # go to the room 
         player.travel(current_unexplored_direction)
         # and add it to path
         traversal_path.append(current_unexplored_direction)
         # give direction a value of room id
         graph[previous_room][current_unexplored_direction] = player.current_room.id
+        opposite_path.append(opposite_direction[current_unexplored_direction])
         print(f'traversal path: {traversal_path}')
         print(f'Current room: {player.current_room.id}')
     
         # get opposite path, and backtrack until you find a ? 
-        opposite_path = []
-        for direction in traversal_path:
-            if direction == 'n':
-                opposite_path.append('s')
-            elif direction == 'w':
-                opposite_path.append('e')
-            elif direction == 's':
-                opposite_path.append('n')
-            elif direction == 'e':
-                opposite_path.append('w')
+        # opposite_path = []
+        # for direction in traversal_path:
+        #     if direction == 'n':
+        #         opposite_path.append('s')
+        #     elif direction == 'w':
+        #         opposite_path.append('e')
+        #     elif direction == 's':
+        #         opposite_path.append('n')
+        #     elif direction == 'e':
+        #         opposite_path.append('w')
 
         print(f'opposite path: {opposite_path}')
         print(f'Graph: {graph}')
 
-    # otherwise, while backtrack until we find ?
+    # otherwise, backtrack until we find ?
     else:
+        # travel to pevious if there are no rooms to explore and we still can backtrack
         while current_unexplored_direction is None and len(opposite_path) > 0:
             # get direction to get to previous room
             backtrack = opposite_path.pop()
-            if backtrack is not None:
-                # move to next previous room
-                player.travel(backtrack)
+            # move to previous room
+            player.travel(backtrack)
             # add to path
             traversal_path.append(backtrack)
             # reset current unexplored direction to random available exit
             current_unexplored_direction = get_unexplored_direction()
+        # reset everything
+        previous_room = None
+        previous_direction = None
+        # if there's nothing left in opposite path, reset path to empty
+        if len(opposite_path) == 0:
+            opposite_path = []
 
 
 # TRAVERSAL TEST
